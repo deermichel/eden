@@ -220,7 +220,7 @@ mod tests {
 
         let b = a.normalize();
         assert_eq!(b.length(), 1.0);
-        
+
         let c = Vector3f::new(2.0, 1.0, 0.0);
         assert_eq!(a.dot(&c), 10.0);
         assert_eq!(c.dot(&a), 10.0);

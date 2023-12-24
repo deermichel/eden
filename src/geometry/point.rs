@@ -11,7 +11,9 @@ pub struct Point<T: Float, const N: usize> {
 impl<T: Float> Point<T, 3> {
     /// Creates 3-dim point from coordinates.
     pub fn new(x: T, y: T, z: T) -> Self {
-        Point { position: Vector::new(x, y, z) }
+        Point {
+            position: Vector::new(x, y, z),
+        }
     }
 }
 
@@ -20,7 +22,9 @@ impl<T: Float, const N: usize> std::ops::Add<Vector<T, N>> for Point<T, N> {
 
     /// Point + Vector -> Point.
     fn add(self, rhs: Vector<T, N>) -> Self::Output {
-        Point { position: self.position + rhs }
+        Point {
+            position: self.position + rhs,
+        }
     }
 }
 
@@ -38,7 +42,9 @@ impl<T: Float, const N: usize> std::ops::Sub<Vector<T, N>> for Point<T, N> {
 
     /// Point - Vector -> Point.
     fn sub(self, rhs: Vector<T, N>) -> Self::Output {
-        Point { position: self.position - rhs }
+        Point {
+            position: self.position - rhs,
+        }
     }
 }
 
