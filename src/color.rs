@@ -2,7 +2,7 @@ use crate::geometry::vector::Vector;
 use num_traits::Float;
 
 /// Abstract color with N components.
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Color<T: Float, const N: usize> {
     /// Color vector.
     values: Vector<T, N>,
