@@ -7,6 +7,31 @@ pub struct Vector<T: Float, const N: usize> {
     components: [T; N],
 }
 
+impl<T: Float, const N: usize> Vector<T, N> {
+    /// Dot product with other vector.
+    pub fn dot(&self, v: &Self) -> T {
+        self.components
+            .iter()
+            .zip(v.components)
+            .fold(T::zero(), |acc, (&a, b)| acc + (a * b))
+    }
+
+    /// Length of the vector.
+    pub fn length(&self) -> T {
+        self.length_squared().sqrt()
+    }
+
+    /// Squared length of the vector.
+    pub fn length_squared(&self) -> T {
+        self.dot(self)
+    }
+
+    /// Normalizes the vector to unit length.
+    pub fn normalize(self) -> Self {
+        self / self.length()
+    }
+}
+
 impl<T: Float> Vector<T, 3> {
     /// Creates 3-dim vector from components.
     pub fn new(x: T, y: T, z: T) -> Self {
@@ -185,5 +210,19 @@ mod tests {
         assert_eq!(v, d);
         v /= b;
         assert_eq!(v, a);
+    }
+
+    #[test]
+    fn geometry() {
+        let a = Vector3f::new(3.0, 4.0, 5.0);
+        assert_eq!(a.length_squared(), 50.0);
+        assert_eq!(a.length(), 50.0.sqrt());
+
+        let b = a.normalize();
+        assert_eq!(b.length(), 1.0);
+        
+        let c = Vector3f::new(2.0, 1.0, 0.0);
+        assert_eq!(a.dot(&c), 10.0);
+        assert_eq!(c.dot(&a), 10.0);
     }
 }
