@@ -23,17 +23,17 @@ use std::{
 /// Entry point.
 fn main() {
     // Camera.
-    let image_width = 600;
-    let image_height = 337;
+    let image_width = 400;
+    let image_height = 225;
     let mut camera = Camera::new(image_width, image_height);
-    camera.set_samples_per_pixel(50);
+    camera.set_samples_per_pixel(100);
     camera.set_max_depth(50);
 
     // Materials.
     let material_ground = Lambert::new(Color3f::new(0.8, 0.8, 0.0));
     let material_center = Lambert::new(Color3f::new(0.7, 0.3, 0.3));
-    let material_left = Metal::new(Color3f::new(0.8, 0.8, 0.8));
-    let material_right = Metal::new(Color3f::new(0.8, 0.6, 0.2));
+    let material_left = Metal::new(Color3f::new(0.8, 0.8, 0.8), 0.3);
+    let material_right = Metal::new(Color3f::new(0.8, 0.6, 0.2), 1.0);
 
     // Scene.
     let mut scene = Scene::new();

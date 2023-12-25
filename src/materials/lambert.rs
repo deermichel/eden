@@ -26,17 +26,17 @@ impl Interactable for Lambert {
         let mut rng = thread_rng();
 
         // Lambertian distribution.
-        let mut scatter_direction = intersection.normal + Vector3f::random_unit_vector(&mut rng);
+        let mut scattered = intersection.normal + Vector3f::random_unit_vector(&mut rng);
 
         // Catch degenerate scatter direction.
-        if scatter_direction.near_zero() {
-            scatter_direction = intersection.normal;
+        if scattered.near_zero() {
+            scattered = intersection.normal;
         }
 
         // Return interaction struct.
         let interaction = Interaction {
             attenuation: self.albedo,
-            scattered_ray: Ray::new(intersection.point, scatter_direction),
+            scattered_ray: Ray::new(intersection.point, scattered),
         };
         Some(interaction)
     }
