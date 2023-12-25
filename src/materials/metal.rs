@@ -35,6 +35,7 @@ impl Interactable for Metal {
         let reflected = incident_ray.direction().reflect(intersection.normal);
 
         // Apply fuzz.
+        // TODO: Debug difference from https://raytracing.github.io/images/img-1.14-metal-fuzz.png.
         let mut scattered =
             reflected.normalize() + self.fuzz * Vector3f::random_unit_vector(&mut rng);
 
