@@ -20,6 +20,16 @@ impl Ray {
     pub fn at(&self, t: f32) -> Point3f {
         self.origin + t * self.direction
     }
+
+    /// Ray origin.
+    pub fn origin(&self) -> Point3f {
+        self.origin
+    }
+
+    /// Ray direction.
+    pub fn direction(&self) -> Vector3f {
+        self.direction
+    }
 }
 
 /// Unit tests.

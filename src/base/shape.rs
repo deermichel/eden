@@ -7,7 +7,7 @@ pub trait Shape {
 }
 
 /// Struct holding intersection properties.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Intersection {
     /// Intersection point.
     pub point: Point3f,
