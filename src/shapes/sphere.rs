@@ -6,6 +6,7 @@ use crate::base::{
 };
 
 /// Sphere in 3-dim space defined by center position and radius.
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Sphere {
     /// Center position.
     center: Point3f,

@@ -1,5 +1,7 @@
 use crate::base::{interval::Interval, point::Point3f, ray::Ray, vector::Vector3f};
 
+// TODO: For perf: trait -> Intersectable, Shape -> enum.
+
 /// Intersectable shape in 3-dim space.
 pub trait Shape {
     /// Tests for ray intersection in given t-interval. Returns intersection struct if exists.

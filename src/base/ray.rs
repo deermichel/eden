@@ -1,7 +1,7 @@
 use crate::base::{point::Point3f, vector::Vector3f};
 
 /// Ray in 3-dim space defined by origin and direction.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ray {
     /// Initial point.
     origin: Point3f,

@@ -20,6 +20,16 @@ impl<T: Float> Interval<T> {
     pub fn contains(&self, x: T) -> bool {
         self.start < x && x < self.end
     }
+
+    /// Lower bound.
+    pub fn start(&self) -> T {
+        self.start
+    }
+
+    /// Upper bound.
+    pub fn end(&self) -> T {
+        self.end
+    }
 }
 
 /// Unit tests.
