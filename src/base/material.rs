@@ -1,12 +1,13 @@
 use crate::{
     base::{color::Color3f, ray::Ray, shape::Intersection},
-    materials::lambert::Lambert,
+    materials::{lambert::Lambert, metal::Metal},
 };
 
 /// A material defines how an object interacts with light rays.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Material {
     Lambert(Lambert),
+    Metal(Metal),
     None,
 }
 
@@ -14,6 +15,7 @@ impl Interactable for Material {
     fn interact(&self, incident_ray: Ray, intersection: Intersection) -> Option<Interaction> {
         match self {
             Material::Lambert(l) => l.interact(incident_ray, intersection),
+            Material::Metal(m) => m.interact(incident_ray, intersection),
             Material::None => None,
         }
     }

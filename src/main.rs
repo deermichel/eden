@@ -5,9 +5,13 @@ mod scene;
 mod shapes;
 
 use crate::{
-    base::{color::Color3f, material::Material, point::Point3f},
+    base::{
+        color::{Color, Color3f},
+        material::Material,
+        point::Point3f,
+    },
     camera::Camera,
-    materials::lambert::Lambert,
+    materials::{lambert::Lambert, metal::Metal},
     scene::Scene,
     shapes::sphere::Sphere,
 };
@@ -25,18 +29,33 @@ fn main() {
     camera.set_samples_per_pixel(50);
     camera.set_max_depth(50);
 
+    // Materials.
+    let material_ground = Lambert::new(Color3f::new(0.8, 0.8, 0.0));
+    let material_center = Lambert::new(Color3f::new(0.7, 0.3, 0.3));
+    let material_left = Metal::new(Color3f::new(0.8, 0.8, 0.8));
+    let material_right = Metal::new(Color3f::new(0.8, 0.6, 0.2));
+
     // Scene.
     let mut scene = Scene::new();
-    let lambert = Lambert::new(Color3f::new(0.5, 0.5, 0.5));
-    scene.add(Sphere::new(
-        Point3f::new(0.0, 0.0, -1.0),
-        0.5,
-        Material::Lambert(lambert),
-    ));
     scene.add(Sphere::new(
         Point3f::new(0.0, -100.5, -1.0),
         100.0,
-        Material::Lambert(lambert),
+        Material::Lambert(material_ground),
+    ));
+    scene.add(Sphere::new(
+        Point3f::new(0.0, 0.0, -1.0),
+        0.5,
+        Material::Lambert(material_center),
+    ));
+    scene.add(Sphere::new(
+        Point3f::new(-1.0, 0.0, -1.0),
+        0.5,
+        Material::Metal(material_left),
+    ));
+    scene.add(Sphere::new(
+        Point3f::new(1.0, 0.0, -1.0),
+        0.5,
+        Material::Metal(material_right),
     ));
 
     // Render.
