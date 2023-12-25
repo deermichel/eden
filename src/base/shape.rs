@@ -1,4 +1,6 @@
-use crate::base::{interval::Interval, point::Point3f, ray::Ray, vector::Vector3f};
+use crate::base::{
+    interval::Interval, material::Material, point::Point3f, ray::Ray, vector::Vector3f,
+};
 
 // TODO: For perf: trait -> Intersectable, Shape -> enum.
 
@@ -10,12 +12,15 @@ pub trait Shape {
 
 /// Struct holding intersection properties.
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Intersection {
+pub struct Intersection<'a> {
     /// Intersection point.
     pub point: Point3f,
 
     /// Normal at intersection.
     pub normal: Vector3f,
+
+    /// Material at intersection.
+    pub material: &'a Material,
 
     /// Value of ray parameter t.
     pub t: f32,

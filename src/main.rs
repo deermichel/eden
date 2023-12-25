@@ -3,7 +3,12 @@ mod camera;
 mod scene;
 mod shapes;
 
-use crate::{base::point::Point3f, camera::Camera, scene::Scene, shapes::sphere::Sphere};
+use crate::{
+    base::{material::Material, point::Point3f},
+    camera::Camera,
+    scene::Scene,
+    shapes::sphere::Sphere,
+};
 use std::{
     fs::File,
     io::{BufWriter, Write},
@@ -20,8 +25,16 @@ fn main() {
 
     // Scene.
     let mut scene = Scene::new();
-    scene.add(Sphere::new(Point3f::new(0.0, 0.0, -1.0), 0.5));
-    scene.add(Sphere::new(Point3f::new(0.0, -100.5, -1.0), 100.0));
+    scene.add(Sphere::new(
+        Point3f::new(0.0, 0.0, -1.0),
+        0.5,
+        Material::None,
+    ));
+    scene.add(Sphere::new(
+        Point3f::new(0.0, -100.5, -1.0),
+        100.0,
+        Material::None,
+    ));
 
     // Render.
     let image = camera.render(&scene);

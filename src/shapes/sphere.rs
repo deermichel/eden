@@ -1,5 +1,6 @@
 use crate::base::{
     interval::Interval,
+    material::Material,
     point::Point3f,
     ray::Ray,
     shape::{Intersection, Shape},
@@ -13,12 +14,19 @@ pub struct Sphere {
 
     /// Sphere radius.
     radius: f32,
+
+    /// Surface material.
+    material: Material,
 }
 
 impl Sphere {
     /// Creates sphere with center position and radius.
-    pub fn new(center: Point3f, radius: f32) -> Self {
-        Sphere { center, radius }
+    pub fn new(center: Point3f, radius: f32, material: Material) -> Self {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -53,6 +61,7 @@ impl Shape for Sphere {
         // Return intersection struct.
         let intersection = Intersection {
             point,
+            material: &self.material,
             normal,
             t: root,
         };
@@ -68,17 +77,19 @@ mod tests {
 
     #[test]
     fn intersect() {
-        let s = Sphere::new(Point3f::new(0.0, 3.0, 0.0), 2.0);
+        let s = Sphere::new(Point3f::new(0.0, 3.0, 0.0), 2.0, Material::None);
 
         // Outside ray.
         let r1 = Ray::new(Point3f::default(), Vector3f::new(0.0, 1.0, 0.0));
         let i1 = Intersection {
             point: Point3f::new(0.0, 1.0, 0.0),
+            material: &Material::None,
             normal: Vector3f::new(0.0, -1.0, 0.0),
             t: 1.0,
         };
         let i2 = Intersection {
             point: Point3f::new(0.0, 5.0, 0.0),
+            material: &Material::None,
             normal: Vector3f::new(0.0, 1.0, 0.0),
             t: 5.0,
         };
@@ -92,11 +103,13 @@ mod tests {
         let r2 = Ray::new(s.center, Vector3f::new(0.0, 1.0, 0.0));
         let i3 = Intersection {
             point: Point3f::new(0.0, 5.0, 0.0),
+            material: &Material::None,
             normal: Vector3f::new(0.0, 1.0, 0.0),
             t: 2.0,
         };
         let i4 = Intersection {
             point: Point3f::new(0.0, 1.0, 0.0),
+            material: &Material::None,
             normal: Vector3f::new(0.0, -1.0, 0.0),
             t: -2.0,
         };

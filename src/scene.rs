@@ -46,16 +46,16 @@ impl Shape for Scene {
 mod tests {
     use super::*;
     use crate::{
-        base::{point::Point3f, vector::Vector3f},
+        base::{material::Material, point::Point3f, vector::Vector3f},
         shapes::sphere::Sphere,
     };
 
     #[test]
     fn intersect() {
         let mut scene = Scene::new();
-        let s1 = Sphere::new(Point3f::new(2.0, 0.0, 0.0), 1.0);
-        let s2 = Sphere::new(Point3f::new(8.0, 0.0, 0.0), 1.0);
-        let s3 = Sphere::new(Point3f::new(5.0, 0.0, 0.0), 1.0);
+        let s1 = Sphere::new(Point3f::new(2.0, 0.0, 0.0), 1.0, Material::None);
+        let s2 = Sphere::new(Point3f::new(8.0, 0.0, 0.0), 1.0, Material::None);
+        let s3 = Sphere::new(Point3f::new(5.0, 0.0, 0.0), 1.0, Material::None);
         scene.add(s1);
         scene.add(s2);
         scene.add(s3);
@@ -72,7 +72,7 @@ mod tests {
         let i5 = Interval::new(f32::MIN, 1.0);
         assert_eq!(scene.intersect(r1, i5), None);
 
-        let s4 = Sphere::new(Point3f::new(7.9, 0.0, 0.0), 1.0);
+        let s4 = Sphere::new(Point3f::new(7.9, 0.0, 0.0), 1.0, Material::None);
         scene.add(s4);
         assert_eq!(scene.intersect(r1, i4), s4.intersect(r1, i4));
     }
