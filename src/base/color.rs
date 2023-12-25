@@ -16,6 +16,21 @@ impl<T: Float> Color<T, 3> {
         }
     }
 
+    /// Red component.
+    pub fn r(&self) -> T {
+        self.values.x()
+    }
+
+    /// Green component.
+    pub fn g(&self) -> T {
+        self.values.y()
+    }
+
+    /// Blue component.
+    pub fn b(&self) -> T {
+        self.values.z()
+    }
+
     /// Black.
     pub fn black() -> Self {
         Color::new(T::zero(), T::zero(), T::zero())
