@@ -1,11 +1,13 @@
 mod base;
 mod camera;
+mod materials;
 mod scene;
 mod shapes;
 
 use crate::{
-    base::{material::{Material, Lambert}, point::Point3f, color::Color3f},
+    base::{color::Color3f, material::Material, point::Point3f},
     camera::Camera,
+    materials::lambert::Lambert,
     scene::Scene,
     shapes::sphere::Sphere,
 };

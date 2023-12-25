@@ -32,6 +32,12 @@ impl<T: Float, const N: usize> Vector<T, N> {
         self / self.length()
     }
 
+    /// Reflects vector at the plane represented by the normal.
+    pub fn reflect(self, normal: Self) -> Self {
+        let two = T::one() + T::one();
+        self - normal * two * self.dot(&normal)
+    }
+
     /// Whether vector is close to zero in all components.
     pub fn near_zero(&self) -> bool {
         self.components.iter().all(|x| x.abs() < T::epsilon())
@@ -260,12 +266,14 @@ mod tests {
     }
 
     #[test]
-    fn random() {
-        let mut rng = StdRng::seed_from_u64(42);
-        let a = Vector3f::random_unit_vector(&mut rng);
-        let b = Vector::<f64, 4>::random_unit_vector(&mut rng);
-        assert_eq!(a.length(), 1.0);
-        assert_eq!(b.length(), 1.0);
+    fn reflect() {
+        let a = Vector3f::default();
+        let b = Vector3f::new(2.0, -2.0, 2.0);
+        let c = Vector3f::new(2.0, 2.0, 2.0);
+        let n = Vector3f::new(0.0, 1.0, 0.0);
+        assert_eq!(a.reflect(n), a);
+        assert_eq!(b.reflect(n), c);
+        assert_eq!(c.reflect(n), b);
     }
 
     #[test]
@@ -276,5 +284,14 @@ mod tests {
         assert_eq!(b.near_zero(), false);
         let c = Vector3f::new(f32::EPSILON / 2.0, f32::EPSILON / 2.0, f32::EPSILON / 2.0);
         assert_eq!(c.near_zero(), true);
+    }
+
+    #[test]
+    fn random() {
+        let mut rng = StdRng::seed_from_u64(42);
+        let a = Vector3f::random_unit_vector(&mut rng);
+        let b = Vector::<f64, 4>::random_unit_vector(&mut rng);
+        assert_eq!(a.length(), 1.0);
+        assert_eq!(b.length(), 1.0);
     }
 }
