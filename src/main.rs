@@ -1,5 +1,4 @@
-mod color;
-mod geometry;
+mod base;
 
 fn main() {
     println!("Hello, world!");

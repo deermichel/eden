@@ -1,4 +1,4 @@
-use crate::geometry::{point::Point3f, vector::Vector3f};
+use crate::base::{point::Point3f, vector::Vector3f};
 
 /// Ray in 3-dim space defined by origin and direction.
 #[derive(Clone, Copy, Debug)]

@@ -1,4 +1,4 @@
-use crate::geometry::vector::Vector;
+use crate::base::vector::Vector;
 use num_traits::Float;
 
 /// Abstract color with N components.

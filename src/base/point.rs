@@ -1,4 +1,4 @@
-use crate::geometry::vector::Vector;
+use crate::base::vector::Vector;
 use num_traits::Float;
 
 /// Abstract point in N-dimensional space.
@@ -55,7 +55,7 @@ pub type Point3f = Point<f32, 3>;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::geometry::vector::Vector3f;
+    use crate::base::vector::Vector3f;
 
     #[test]
     fn operators() {
