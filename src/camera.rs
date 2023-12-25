@@ -1,11 +1,11 @@
 use crate::{
     base::{
-        color::Color3f, interval::Interval, point::Point3f, ray::Ray, shape::Shape,
-        vector::Vector3f,
+        color::Color3f, interval::Interval, material::Interactable, point::Point3f, ray::Ray,
+        shape::Shape, vector::Vector3f,
     },
     scene::Scene,
 };
-use rand::{rngs::ThreadRng, thread_rng, Rng};
+use rand::{thread_rng, Rng};
 use std::io::Write;
 
 /// Perspective camera in 3-dim space.
@@ -33,9 +33,6 @@ pub struct Camera {
 
     /// Offset to pixel below.
     pixel_delta_v: Vector3f,
-
-    /// Random number generator.
-    rng: ThreadRng,
 }
 
 impl Camera {
@@ -51,7 +48,6 @@ impl Camera {
             pixel00_location: Point3f::default(),
             pixel_delta_u: Vector3f::default(),
             pixel_delta_v: Vector3f::default(),
-            rng: thread_rng(),
         }
     }
 
@@ -119,7 +115,7 @@ impl Camera {
     }
 
     /// Generates ray for pixel x,y.
-    fn get_ray(&mut self, x: u32, y: u32) -> Ray {
+    fn get_ray(&self, x: u32, y: u32) -> Ray {
         let pixel_center = self.pixel00_location
             + (x as f32 * self.pixel_delta_u)
             + (y as f32 * self.pixel_delta_v);
@@ -132,28 +128,22 @@ impl Camera {
     }
 
     /// Calculate color shading for ray into scene.
-    fn ray_color(&mut self, ray: Ray, depth: u32, scene: &Scene) -> Color3f {
+    fn ray_color(&self, ray: Ray, depth: u32, scene: &Scene) -> Color3f {
         // Recursion limit.
         if depth <= 0 {
             return Color3f::black();
         }
 
         // Intersect with scene.
-        if let Some(i) = scene.intersect(ray, Interval::new(0.001, f32::INFINITY)) {
-            // Sample random unit vector.
-            let random = Vector3f::new(
-                self.rng.gen_range(-1.0..1.0),
-                self.rng.gen_range(-1.0..1.0),
-                self.rng.gen_range(-1.0..1.0),
-            )
-            .normalize();
-
-            // Lambertian distribution.
-            let new_direction = i.normal + random;
-
-            // Recurse and attenuate.
-            let new_ray = Ray::new(i.point, new_direction);
-            return 0.5 * self.ray_color(new_ray, depth - 1, scene);
+        if let Some(isect) = scene.intersect(ray, Interval::new(0.001, f32::INFINITY)) {
+            // Interact with material.
+            if let Some(iact) = isect.material.interact(ray, isect) {
+                // Recurse and attenuate.
+                return iact.attenuation * self.ray_color(iact.scattered_ray, depth - 1, scene);
+            } else {
+                // Fully absorbed.
+                return Color3f::black();
+            }
         }
 
         // Background based on y component of ray direction.
@@ -163,9 +153,10 @@ impl Camera {
     }
 
     /// Samples random offset in pixel square.
-    fn pixel_sample_square(&mut self) -> Vector3f {
-        let dx = -0.5 + self.rng.gen::<f32>();
-        let dy = -0.5 + self.rng.gen::<f32>();
+    fn pixel_sample_square(&self) -> Vector3f {
+        let mut rng = thread_rng();
+        let dx = -0.5 + rng.gen::<f32>();
+        let dy = -0.5 + rng.gen::<f32>();
         (dx * self.pixel_delta_u) + (dy * self.pixel_delta_v)
     }
 }

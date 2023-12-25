@@ -1,16 +1,17 @@
-use crate::base::{color::Color3f, ray::Ray, shape::Intersection};
+use crate::base::{color::Color3f, ray::Ray, shape::Intersection, vector::Vector3f};
+use rand::thread_rng;
 
 /// A material defines how an object interacts with light rays.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Material {
-    Lambertian(Lambertian),
+    Lambert(Lambert),
     None,
 }
 
 impl Interactable for Material {
     fn interact(&self, incident_ray: Ray, intersection: Intersection) -> Option<Interaction> {
         match self {
-            Material::Lambertian(l) => l.interact(incident_ray, intersection),
+            Material::Lambert(l) => l.interact(incident_ray, intersection),
             Material::None => None,
         }
     }
@@ -18,26 +19,41 @@ impl Interactable for Material {
 
 /// Lambertian material model.
 #[derive(Clone, Copy, Debug, PartialEq)]
-struct Lambertian {
+pub struct Lambert {
     /// Fraction of light that the object reflects.
     albedo: Color3f,
 }
 
-impl Lambertian {
+impl Lambert {
     /// Creates lambertian material with given albedo.
     pub fn new(albedo: Color3f) -> Self {
-        Lambertian { albedo }
+        Lambert { albedo }
     }
 }
 
-impl Interactable for Lambertian {
+impl Interactable for Lambert {
     fn interact(&self, incident_ray: Ray, intersection: Intersection) -> Option<Interaction> {
-        None
+        let mut rng = thread_rng();
+
+        // Lambertian distribution.
+        let mut scatter_direction = intersection.normal + Vector3f::random_unit_vector(&mut rng);
+
+        // Catch degenerate scatter direction.
+        if scatter_direction.near_zero() {
+            scatter_direction = intersection.normal;
+        }
+
+        // Return interaction struct.
+        let interaction = Interaction {
+            attenuation: self.albedo,
+            scattered_ray: Ray::new(intersection.point, scatter_direction),
+        };
+        Some(interaction)
     }
 }
 
 /// An interactable object can interact with light rays.
-trait Interactable {
+pub trait Interactable {
     /// Evaluates interactable at a given intersection point. Returns interaction struct if not absorbed.
     fn interact(&self, incident_ray: Ray, intersection: Intersection) -> Option<Interaction>;
 }
@@ -46,8 +62,8 @@ trait Interactable {
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Interaction {
     /// Color attenuation to be applied to scattered ray.
-    attenuation: Color3f,
+    pub attenuation: Color3f,
 
     /// Scattered ray.
-    scattered_ray: Ray,
+    pub scattered_ray: Ray,
 }

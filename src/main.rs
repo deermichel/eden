@@ -4,7 +4,7 @@ mod scene;
 mod shapes;
 
 use crate::{
-    base::{material::Material, point::Point3f},
+    base::{material::{Material, Lambert}, point::Point3f, color::Color3f},
     camera::Camera,
     scene::Scene,
     shapes::sphere::Sphere,
@@ -25,15 +25,16 @@ fn main() {
 
     // Scene.
     let mut scene = Scene::new();
+    let lambert = Lambert::new(Color3f::new(0.5, 0.5, 0.5));
     scene.add(Sphere::new(
         Point3f::new(0.0, 0.0, -1.0),
         0.5,
-        Material::None,
+        Material::Lambert(lambert),
     ));
     scene.add(Sphere::new(
         Point3f::new(0.0, -100.5, -1.0),
         100.0,
-        Material::None,
+        Material::Lambert(lambert),
     ));
 
     // Render.

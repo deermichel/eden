@@ -1,4 +1,5 @@
 use num_traits::Float;
+use rand::{distributions::uniform::SampleUniform, Rng};
 
 /// Abstract vector in N-dimensional space.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -29,6 +30,22 @@ impl<T: Float, const N: usize> Vector<T, N> {
     /// Normalizes the vector to unit length.
     pub fn normalize(self) -> Self {
         self / self.length()
+    }
+
+    /// Whether vector is close to zero in all components.
+    pub fn near_zero(&self) -> bool {
+        self.components.iter().all(|x| x.abs() < T::epsilon())
+    }
+}
+
+impl<T: Float + SampleUniform, const N: usize> Vector<T, N> {
+    /// Generates random vector of unit length.
+    pub fn random_unit_vector(rng: &mut impl Rng) -> Self {
+        let mut result = Vector::default();
+        for i in 0..N {
+            result.components[i] = rng.gen_range(-T::one()..T::one());
+        }
+        result.normalize()
     }
 }
 
@@ -177,6 +194,7 @@ pub type Vector3f = Vector<f32, 3>;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::{rngs::StdRng, SeedableRng};
 
     #[test]
     fn default() {
@@ -239,5 +257,24 @@ mod tests {
         let c = Vector3f::new(2.0, 1.0, 0.0);
         assert_eq!(a.dot(&c), 10.0);
         assert_eq!(c.dot(&a), 10.0);
+    }
+
+    #[test]
+    fn random() {
+        let mut rng = StdRng::seed_from_u64(42);
+        let a = Vector3f::random_unit_vector(&mut rng);
+        let b = Vector::<f64, 4>::random_unit_vector(&mut rng);
+        assert_eq!(a.length(), 1.0);
+        assert_eq!(b.length(), 1.0);
+    }
+
+    #[test]
+    fn near_zero() {
+        let a = Vector3f::default();
+        assert_eq!(a.near_zero(), true);
+        let b = Vector3f::new(f32::EPSILON, 0.0, 0.0);
+        assert_eq!(b.near_zero(), false);
+        let c = Vector3f::new(f32::EPSILON / 2.0, f32::EPSILON / 2.0, f32::EPSILON / 2.0);
+        assert_eq!(c.near_zero(), true);
     }
 }
