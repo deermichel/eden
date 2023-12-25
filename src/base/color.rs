@@ -15,6 +15,16 @@ impl<T: Float> Color<T, 3> {
             values: Vector::new(r, g, b),
         }
     }
+
+    /// Black.
+    pub fn black() -> Self {
+        Color::new(T::zero(), T::zero(), T::zero())
+    }
+
+    /// White.
+    pub fn white() -> Self {
+        Color::new(T::one(), T::one(), T::one())
+    }
 }
 
 /// Helper macro for binary operator overloading.

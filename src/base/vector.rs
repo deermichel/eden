@@ -39,6 +39,21 @@ impl<T: Float> Vector<T, 3> {
             components: [x, y, z],
         }
     }
+
+    /// X component.
+    pub fn x(&self) -> T {
+        self.components[0]
+    }
+
+    /// Y component.
+    pub fn y(&self) -> T {
+        self.components[1]
+    }
+
+    /// Z component.
+    pub fn z(&self) -> T {
+        self.components[2]
+    }
 }
 
 impl<T: Float, const N: usize> Default for Vector<T, N> {

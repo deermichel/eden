@@ -1,4 +1,5 @@
 mod base;
+mod camera;
 mod scene;
 mod shapes;
 
