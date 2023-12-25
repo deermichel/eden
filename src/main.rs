@@ -12,10 +12,10 @@ use std::{
 /// Entry point.
 fn main() {
     // Camera.
-    let image_width = 800;
-    let image_height = 600;
+    let image_width = 600;
+    let image_height = 337;
     let mut camera = Camera::new(image_width, image_height);
-    camera.set_samples_per_pixel(500);
+    camera.set_samples_per_pixel(50);
     camera.set_max_depth(50);
 
     // Scene.

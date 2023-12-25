@@ -140,12 +140,15 @@ impl Camera {
 
         // Intersect with scene.
         if let Some(i) = scene.intersect(ray, Interval::new(0.001, f32::INFINITY)) {
-            // Lambertian distribution.
+            // Sample random unit vector.
             let random = Vector3f::new(
                 self.rng.gen_range(-1.0..1.0),
                 self.rng.gen_range(-1.0..1.0),
                 self.rng.gen_range(-1.0..1.0),
-            );
+            )
+            .normalize();
+
+            // Lambertian distribution.
             let new_direction = i.normal + random;
 
             // Recurse and attenuate.
