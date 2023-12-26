@@ -57,3 +57,31 @@ impl Interactable for Metal {
         Some(interaction)
     }
 }
+
+/// Unit tests.
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::base::{material::Material, point::Point3f};
+
+    #[test]
+    fn interact() {
+        let albedo = Color3f::new(1.0, 1.0, 0.0);
+        let m = Metal::new(albedo, 0.0);
+        let mat = Material::Metal(m);
+        let r = Ray::new(Point3f::default(), Vector3f::new(2.0, -2.0, 0.0));
+        let isect = Intersection {
+            point: Point3f::new(1.0, 1.0, 1.0),
+            normal: Vector3f::new(0.0, 1.0, 0.0),
+            material: &mat,
+            t: 1.0,
+        };
+        let iact = mat.interact(r, isect).unwrap();
+        assert_eq!(iact.attenuation, albedo);
+        assert_eq!(iact.scattered_ray.origin(), isect.point);
+        assert_eq!(
+            iact.scattered_ray.direction(),
+            r.direction().reflect(isect.normal).normalize()
+        );
+    }
+}

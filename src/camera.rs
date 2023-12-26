@@ -242,3 +242,38 @@ impl Camera {
         self.look_from + (dv.x() * self.defocus_disk_u) + (dv.y() * self.defocus_disk_v)
     }
 }
+
+/// Unit tests.
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn initialize() {
+        let mut c = Camera::new(2000, 1000);
+        c.set_vfov(90.0);
+        c.set_look_from(Point3f::default());
+        c.set_look_at(Point3f::new(1.0, 0.0, 0.0));
+        c.set_defocus_angle(90.0);
+        c.set_focus_distance(10.0);
+
+        c.initialize();
+        assert_eq!(c.pixel00_location, Point3f::new(10.0, 9.99, -19.99));
+        assert_eq!(c.pixel_delta_u, Vector3f::new(0.0, 0.0, 0.02));
+        assert_eq!(c.pixel_delta_v, Vector3f::new(0.0, -0.02, 0.0));
+        assert_eq!(c.defocus_disk_u, Vector3f::new(0.0, 0.0, 10.0));
+        assert_eq!(c.defocus_disk_v, Vector3f::new(0.0, 10.0, 0.0));
+    }
+
+    #[test]
+    fn get_ray() {
+        let mut c = Camera::new(2000, 1000);
+        c.set_look_from(Point3f::new(1.0, 0.0, 0.0));
+        c.initialize();
+
+        let r = c.get_ray(10, 10);
+        let pixel_center = c.pixel00_location + 10.0 * (c.pixel_delta_u + c.pixel_delta_v);
+        assert_eq!(r.at(0.0), c.look_from);
+        assert!((r.at(1.0) - pixel_center).length() <= c.pixel_delta_u.length());
+    }
+}
