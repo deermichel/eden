@@ -1,13 +1,13 @@
 use crate::base::{
     interval::Interval,
     ray::Ray,
-    shape::{Intersection, Shape},
+    shape::{Intersectable, Intersection, Shape},
 };
 
 /// 3-dim scene holding shape objects.
 pub struct Scene {
     /// Objects in scene.
-    objects: Vec<Box<dyn Shape>>, // TODO: Performance enum vs dyn.
+    objects: Vec<Shape>,
 }
 
 impl Scene {
@@ -19,12 +19,12 @@ impl Scene {
     }
 
     /// Adds object to scene.
-    pub fn add(&mut self, object: impl Shape + 'static) {
-        self.objects.push(Box::new(object));
+    pub fn add(&mut self, object: Shape) {
+        self.objects.push(object);
     }
 }
 
-impl Shape for Scene {
+impl Intersectable for Scene {
     fn intersect(&self, ray: Ray, ray_t: Interval) -> Option<Intersection> {
         let mut intersection = None;
         let mut closest_t = ray_t.end();
@@ -56,9 +56,9 @@ mod tests {
         let s1 = Sphere::new(Point3f::new(2.0, 0.0, 0.0), 1.0, Material::None);
         let s2 = Sphere::new(Point3f::new(8.0, 0.0, 0.0), 1.0, Material::None);
         let s3 = Sphere::new(Point3f::new(5.0, 0.0, 0.0), 1.0, Material::None);
-        scene.add(s1);
-        scene.add(s2);
-        scene.add(s3);
+        scene.add(Shape::Sphere(s1));
+        scene.add(Shape::Sphere(s2));
+        scene.add(Shape::Sphere(s3));
 
         let r1 = Ray::new(Point3f::default(), Vector3f::new(1.0, 0.0, 0.0));
         let i1 = Interval::new(0.0, 10.0);
@@ -73,7 +73,7 @@ mod tests {
         assert_eq!(scene.intersect(r1, i5), None);
 
         let s4 = Sphere::new(Point3f::new(7.9, 0.0, 0.0), 1.0, Material::None);
-        scene.add(s4);
+        scene.add(Shape::Sphere(s4));
         assert_eq!(scene.intersect(r1, i4), s4.intersect(r1, i4));
     }
 }

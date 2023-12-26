@@ -1,7 +1,7 @@
 use crate::{
     base::{
         color::Color3f, interval::Interval, material::Interactable, point::Point3f, ray::Ray,
-        shape::Shape, vector::Vector3f,
+        shape::Intersectable, vector::Vector3f,
     },
     scene::Scene,
 };

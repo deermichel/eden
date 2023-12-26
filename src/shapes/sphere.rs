@@ -3,7 +3,7 @@ use crate::base::{
     material::Material,
     point::Point3f,
     ray::Ray,
-    shape::{Intersection, Shape},
+    shape::{Intersectable, Intersection},
 };
 
 /// Sphere in 3-dim space defined by center position and radius.
@@ -30,7 +30,7 @@ impl Sphere {
     }
 }
 
-impl Shape for Sphere {
+impl Intersectable for Sphere {
     fn intersect(&self, ray: Ray, ray_t: Interval) -> Option<Intersection> {
         // Solve quadratic equation.
         let oc = ray.origin() - self.center;

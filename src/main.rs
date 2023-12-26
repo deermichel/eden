@@ -5,7 +5,7 @@ mod scene;
 mod shapes;
 
 use crate::{
-    base::{color::Color3f, material::Material, point::Point3f, vector::Vector3f},
+    base::{color::Color3f, material::Material, point::Point3f, shape::Shape, vector::Vector3f},
     camera::Camera,
     materials::{dielectric::Dielectric, lambert::Lambert, metal::Metal},
     scene::Scene,
@@ -20,10 +20,10 @@ use std::{
 /// Entry point.
 fn main() {
     // Camera.
-    let image_width = 1200/2;
-    let image_height = 675/2;
+    let image_width = 1200;
+    let image_height = 675;
     let mut camera = Camera::new(image_width, image_height);
-    camera.set_samples_per_pixel(10);
+    camera.set_samples_per_pixel(500);
     camera.set_max_depth(50);
 
     camera.set_vfov(20.0);
@@ -38,11 +38,11 @@ fn main() {
     let mut scene = Scene::new();
 
     let ground_material = Lambert::new(Color3f::new(0.5, 0.5, 0.5));
-    scene.add(Sphere::new(
+    scene.add(Shape::Sphere(Sphere::new(
         Point3f::new(0.0, -1000.0, 0.0),
         1000.0,
         Material::Lambert(ground_material),
-    ));
+    )));
 
     let rnd_f32 = || thread_rng().gen::<f32>();
     let rnd_color = || {
@@ -63,42 +63,50 @@ fn main() {
                     // Diffuse.
                     let albedo = rnd_color() * rnd_color();
                     let l = Lambert::new(albedo);
-                    scene.add(Sphere::new(center, 0.2, Material::Lambert(l)));
+                    scene.add(Shape::Sphere(Sphere::new(
+                        center,
+                        0.2,
+                        Material::Lambert(l),
+                    )));
                 } else if choose_mat < 0.95 {
                     // Metal.
                     let albedo = (rnd_color() / 2.0) + 0.5;
                     let fuzz = rnd_f32() * 0.5;
                     let m = Metal::new(albedo, fuzz);
-                    scene.add(Sphere::new(center, 0.2, Material::Metal(m)));
+                    scene.add(Shape::Sphere(Sphere::new(center, 0.2, Material::Metal(m))));
                 } else {
                     // Glass.
                     let d = Dielectric::new(1.5);
-                    scene.add(Sphere::new(center, 0.2, Material::Dielectric(d)));
+                    scene.add(Shape::Sphere(Sphere::new(
+                        center,
+                        0.2,
+                        Material::Dielectric(d),
+                    )));
                 }
             }
         }
     }
 
     let material1 = Dielectric::new(1.5);
-    scene.add(Sphere::new(
+    scene.add(Shape::Sphere(Sphere::new(
         Point3f::new(0.0, 1.0, 0.0),
         1.0,
         Material::Dielectric(material1),
-    ));
+    )));
 
     let material2 = Lambert::new(Color3f::new(0.4, 0.2, 0.1));
-    scene.add(Sphere::new(
+    scene.add(Shape::Sphere(Sphere::new(
         Point3f::new(-4.0, 1.0, 0.0),
         1.0,
         Material::Lambert(material2),
-    ));
+    )));
 
     let material3 = Metal::new(Color3f::new(0.7, 0.6, 0.5), 0.0);
-    scene.add(Sphere::new(
+    scene.add(Shape::Sphere(Sphere::new(
         Point3f::new(4.0, 1.0, 0.0),
         1.0,
         Material::Metal(material3),
-    ));
+    )));
 
     // Render.
     let image = camera.render(&scene);
