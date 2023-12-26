@@ -6,7 +6,14 @@ use crate::{
     scene::Scene,
 };
 use rand::{thread_rng, Rng};
-use std::io::Write;
+use rayon::{
+    iter::{IndexedParallelIterator, ParallelIterator},
+    slice::ParallelSliceMut,
+};
+use std::{
+    io::Write,
+    sync::atomic::{AtomicU32, Ordering},
+};
 
 /// Perspective camera in 3-dim space.
 pub struct Camera {
@@ -82,30 +89,33 @@ impl Camera {
     /// Renders scene.
     pub fn render(&mut self, scene: &Scene) -> Vec<Color3f> {
         self.initialize();
-        let mut pixels = Vec::with_capacity((self.image_width * self.image_height) as usize);
+        let mut pixels = vec![Color3f::black(); (self.image_width * self.image_height) as usize];
 
         // Render loop.
-        for y in 0..self.image_height {
-            for x in 0..self.image_width {
-                let mut color = Color3f::black();
+        let progress = AtomicU32::new(0);
+        pixels
+            .par_chunks_mut(self.image_width as usize)
+            .enumerate()
+            .for_each(|(y, line)| {
+                line.iter_mut().enumerate().for_each(|(x, pixel)| {
+                    // Multi sample rendering.
+                    for _ in 0..self.samples_per_pixel {
+                        let ray = self.get_ray(x as u32, y as u32);
+                        *pixel += self.ray_color(ray, self.max_depth, &scene);
+                    }
 
-                // Multi sample rendering.
-                for _ in 0..self.samples_per_pixel {
-                    let ray = self.get_ray(x, y);
-                    color += self.ray_color(ray, self.max_depth, &scene);
-                }
+                    // Average samples.
+                    *pixel = *pixel / self.samples_per_pixel as f32;
+                });
 
-                // Average samples.
-                pixels.push(color / self.samples_per_pixel as f32);
-            }
-
-            // Progress stdout.
-            print!(
-                "\r{:.2}%",
-                y as f32 / (self.image_height - 1) as f32 * 100.0
-            );
-            std::io::stdout().flush().unwrap();
-        }
+                // Progress stdout.
+                let progress = progress.fetch_add(1, Ordering::Relaxed);
+                print!(
+                    "\r{:.2}%",
+                    progress as f32 / (self.image_height - 1) as f32 * 100.0
+                );
+                std::io::stdout().flush().unwrap();
+            });
 
         pixels
     }
