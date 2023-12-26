@@ -55,8 +55,7 @@ impl Shape for Sphere {
         let point = ray.at(root);
 
         // Calculate normal.
-        let outward_normal = (point - self.center) / self.radius;
-        let normal = outward_normal; // TODO: Front vs back face.
+        let normal = (point - self.center) / self.radius;
 
         // Return intersection struct.
         let intersection = Intersection {

@@ -38,6 +38,23 @@ impl<T: Float, const N: usize> Vector<T, N> {
         self - normal * two * self.dot(&normal)
     }
 
+    /// Refracts (normalized!) vector at the plane represented by the normal with given refraction ratio.
+    /// Returns none in case of total internal reflection.
+    pub fn refract(self, normal: Self, etai_over_etat: T) -> Option<Self> {
+        let cos_i = (-normal.dot(&self)).min(T::one());
+        let sin2_i = T::one() - cos_i * cos_i;
+        let sin2_t = (etai_over_etat * etai_over_etat) * sin2_i;
+
+        // Total internal reflection.
+        if sin2_t > T::one() {
+            return None;
+        }
+
+        let cos_t = (T::one() - sin2_t).sqrt();
+        let t = self * etai_over_etat + normal * (etai_over_etat * cos_i - cos_t);
+        Some(t)
+    }
+
     /// Whether vector is close to zero in all components.
     pub fn near_zero(&self) -> bool {
         self.components.iter().all(|x| x.abs() < T::epsilon())
@@ -274,6 +291,17 @@ mod tests {
         assert_eq!(a.reflect(n), a);
         assert_eq!(b.reflect(n), c);
         assert_eq!(c.reflect(n), b);
+    }
+
+    #[test]
+    fn refract() {
+        let a = Vector3f::new(f32::sqrt(3.0), -1.0, 0.0).normalize();
+        let b = Vector3f::new(1.0, -1.0, 0.0).normalize();
+        let n = Vector3f::new(0.0, 1.0, 0.0);
+        assert_eq!(a.refract(n, 1.0), Some(a));
+        assert_eq!(a.refract(n, f32::sqrt(2.0 / 3.0)), Some(b));
+        assert!((b.refract(n, f32::sqrt(3.0 / 2.0)).unwrap() - a).near_zero());
+        assert_eq!(a.refract(n, 2.0), None);
     }
 
     #[test]
