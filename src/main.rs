@@ -8,7 +8,8 @@ use crate::{
     base::{
         color::{Color, Color3f},
         material::Material,
-        point::Point3f, vector::Vector3f,
+        point::Point3f,
+        vector::Vector3f,
     },
     camera::Camera,
     materials::{dielectric::Dielectric, lambert::Lambert, metal::Metal},
@@ -33,6 +34,9 @@ fn main() {
     camera.set_look_from(Point3f::new(-2.0, 2.0, 1.0));
     camera.set_look_at(Point3f::new(0.0, 0.0, -1.0));
     camera.set_view_up(Vector3f::new(0.0, 1.0, 0.0));
+
+    camera.set_defocus_angle(5.0);
+    camera.set_focus_distance(3.4);
 
     // Materials.
     let material_ground = Lambert::new(Color3f::new(0.8, 0.8, 0.0));

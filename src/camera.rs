@@ -34,6 +34,12 @@ pub struct Camera {
     /// Camera-relative 'up' direction.
     view_up: Vector3f,
 
+    /// Variation angle of rays from thin lens through each pixel.
+    defocus_angle: f32,
+
+    /// Distance from 'look from' point to plane of perfect focus.
+    focus_distance: f32,
+
     /// Location of top left pixel (0,0).
     pixel00_location: Point3f,
 
@@ -42,6 +48,12 @@ pub struct Camera {
 
     /// Offset to pixel below.
     pixel_delta_v: Vector3f,
+
+    /// Defocus disk horizontal basis.
+    defocus_disk_u: Vector3f,
+
+    /// Defocus disk vertical basis.
+    defocus_disk_v: Vector3f,
 }
 
 impl Camera {
@@ -57,9 +69,13 @@ impl Camera {
             look_from: Point3f::new(0.0, 0.0, -1.0),
             look_at: Point3f::default(),
             view_up: Vector3f::new(0.0, 1.0, 0.0),
+            defocus_angle: 0.0,
+            focus_distance: 1.0,
             pixel00_location: Point3f::default(),
             pixel_delta_u: Vector3f::default(),
             pixel_delta_v: Vector3f::default(),
+            defocus_disk_u: Vector3f::default(),
+            defocus_disk_v: Vector3f::default(),
         }
     }
 
@@ -124,13 +140,22 @@ impl Camera {
         self.view_up = view_up;
     }
 
+    /// Sets defocus angle.
+    pub fn set_defocus_angle(&mut self, defocus_angle: f32) {
+        self.defocus_angle = defocus_angle;
+    }
+
+    /// Sets focus distance.
+    pub fn set_focus_distance(&mut self, focus_distance: f32) {
+        self.focus_distance = focus_distance;
+    }
+
     /// Initializes rendering vars.
     fn initialize(&mut self) {
         // Viewport dimensions.
         let aspect_ratio = (self.image_width as f32) / (self.image_height as f32);
-        let focal_length = (self.look_at - self.look_from).length();
         let h = (self.vfov.to_radians() / 2.0).tan();
-        let viewport_height = 2.0 * h * focal_length;
+        let viewport_height = 2.0 * h * self.focus_distance;
         let viewport_width = viewport_height * aspect_ratio;
 
         // Orthonormal basis u,v,w for camera coordinate system.
@@ -147,11 +172,14 @@ impl Camera {
         self.pixel_delta_v = viewport_v / self.image_height as f32;
 
         // Pixel positions in space.
-        let viewport_top_left = self.look_from
-            - (focal_length * w)
-            - (viewport_u / 2.0)
-            - (viewport_v / 2.0);
+        let viewport_top_left =
+            self.look_from - (self.focus_distance * w) - (viewport_u / 2.0) - (viewport_v / 2.0);
         self.pixel00_location = viewport_top_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
+
+        // Defocus disk basis vectors.
+        let defocus_radius = self.focus_distance * (self.defocus_angle / 2.0).to_radians().tan();
+        self.defocus_disk_u = defocus_radius * u;
+        self.defocus_disk_v = defocus_radius * v;
     }
 
     /// Generates ray for pixel x,y.
@@ -159,9 +187,13 @@ impl Camera {
         let pixel_center = self.pixel00_location
             + (x as f32 * self.pixel_delta_u)
             + (y as f32 * self.pixel_delta_v);
-        let pixel_sample = pixel_center + self.pixel_sample_square();
+        let pixel_sample = pixel_center + self.sample_pixel_square();
 
-        let ray_origin = self.look_from;
+        let ray_origin = if self.defocus_angle <= 0.0 {
+            self.look_from
+        } else {
+            self.sample_defocus_disk()
+        };
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)
@@ -193,10 +225,20 @@ impl Camera {
     }
 
     /// Samples random offset in pixel square.
-    fn pixel_sample_square(&self) -> Vector3f {
+    fn sample_pixel_square(&self) -> Vector3f {
         let mut rng = thread_rng();
         let dx = -0.5 + rng.gen::<f32>();
         let dy = -0.5 + rng.gen::<f32>();
         (dx * self.pixel_delta_u) + (dy * self.pixel_delta_v)
+    }
+
+    /// Samples random point in camera defocus disk.
+    fn sample_defocus_disk(&self) -> Point3f {
+        let mut rng = thread_rng();
+        let mut dv = Vector3f::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
+        if dv.length_squared() > 1.0 {
+            dv = dv.normalize();
+        }
+        self.look_from + (dv.x() * self.defocus_disk_u) + (dv.y() * self.defocus_disk_v)
     }
 }
