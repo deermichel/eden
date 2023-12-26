@@ -20,10 +20,10 @@ use std::{
 /// Entry point.
 fn main() {
     // Camera.
-    let image_width = 1200;
-    let image_height = 675;
+    let image_width = 1200/2;
+    let image_height = 675/2;
     let mut camera = Camera::new(image_width, image_height);
-    camera.set_samples_per_pixel(500);
+    camera.set_samples_per_pixel(10);
     camera.set_max_depth(50);
 
     camera.set_vfov(20.0);
@@ -48,9 +48,9 @@ fn main() {
     let rnd_color = || {
         let mut rng = thread_rng();
         Color3f::new(
-            rng.gen_range(-1.0..1.0),
-            rng.gen_range(-1.0..1.0),
-            rng.gen_range(-1.0..1.0),
+            rng.gen_range(0.0..1.0),
+            rng.gen_range(0.0..1.0),
+            rng.gen_range(0.0..1.0),
         )
     };
     for a in -11..11 {
@@ -66,7 +66,7 @@ fn main() {
                     scene.add(Sphere::new(center, 0.2, Material::Lambert(l)));
                 } else if choose_mat < 0.95 {
                     // Metal.
-                    let albedo = (rnd_color() / 4.0) + 0.75;
+                    let albedo = (rnd_color() / 2.0) + 0.5;
                     let fuzz = rnd_f32() * 0.5;
                     let m = Metal::new(albedo, fuzz);
                     scene.add(Sphere::new(center, 0.2, Material::Metal(m)));
