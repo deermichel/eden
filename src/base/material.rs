@@ -9,6 +9,8 @@ pub enum Material {
     Dielectric(Dielectric),
     Lambert(Lambert),
     Metal(Metal),
+
+    #[cfg(test)]
     None,
 }
 
@@ -18,6 +20,8 @@ impl Interactable for Material {
             Material::Dielectric(d) => d.interact(incident_ray, intersection),
             Material::Lambert(l) => l.interact(incident_ray, intersection),
             Material::Metal(m) => m.interact(incident_ray, intersection),
+
+            #[cfg(test)]
             Material::None => None,
         }
     }
