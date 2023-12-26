@@ -8,7 +8,7 @@ use crate::{
     base::{
         color::{Color, Color3f},
         material::Material,
-        point::Point3f,
+        point::Point3f, vector::Vector3f,
     },
     camera::Camera,
     materials::{dielectric::Dielectric, lambert::Lambert, metal::Metal},
@@ -28,6 +28,11 @@ fn main() {
     let mut camera = Camera::new(image_width, image_height);
     camera.set_samples_per_pixel(100);
     camera.set_max_depth(50);
+
+    camera.set_vfov(20.0);
+    camera.set_look_from(Point3f::new(-2.0, 2.0, 1.0));
+    camera.set_look_at(Point3f::new(0.0, 0.0, -1.0));
+    camera.set_view_up(Vector3f::new(0.0, 1.0, 0.0));
 
     // Materials.
     let material_ground = Lambert::new(Color3f::new(0.8, 0.8, 0.0));
@@ -50,6 +55,11 @@ fn main() {
     scene.add(Sphere::new(
         Point3f::new(-1.0, 0.0, -1.0),
         0.5,
+        Material::Dielectric(material_left),
+    ));
+    scene.add(Sphere::new(
+        Point3f::new(-1.0, 0.0, -1.0),
+        -0.4,
         Material::Dielectric(material_left),
     ));
     scene.add(Sphere::new(

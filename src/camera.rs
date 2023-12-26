@@ -22,8 +22,17 @@ pub struct Camera {
     /// Max number of recursive ray bounces into scene.
     max_depth: u32,
 
-    /// Camera position in scene.
-    position: Point3f,
+    /// Vertical view angle.
+    vfov: f32,
+
+    /// Point camera is looking from.
+    look_from: Point3f,
+
+    /// Point camera is looking at.
+    look_at: Point3f,
+
+    /// Camera-relative 'up' direction.
+    view_up: Vector3f,
 
     /// Location of top left pixel (0,0).
     pixel00_location: Point3f,
@@ -44,7 +53,10 @@ impl Camera {
             image_height,
             samples_per_pixel: 10,
             max_depth: 10,
-            position: Point3f::default(),
+            vfov: 90.0,
+            look_from: Point3f::new(0.0, 0.0, -1.0),
+            look_at: Point3f::default(),
+            view_up: Vector3f::new(0.0, 1.0, 0.0),
             pixel00_location: Point3f::default(),
             pixel_delta_u: Vector3f::default(),
             pixel_delta_v: Vector3f::default(),
@@ -92,23 +104,51 @@ impl Camera {
         self.max_depth = max_depth;
     }
 
+    /// Sets vertical field of view.
+    pub fn set_vfov(&mut self, vfov: f32) {
+        self.vfov = vfov;
+    }
+
+    /// Sets point camera is looking from.
+    pub fn set_look_from(&mut self, look_from: Point3f) {
+        self.look_from = look_from;
+    }
+
+    /// Sets point camera is looking at.
+    pub fn set_look_at(&mut self, look_at: Point3f) {
+        self.look_at = look_at;
+    }
+
+    /// Sets camera-relative 'up' direction.
+    pub fn set_view_up(&mut self, view_up: Vector3f) {
+        self.view_up = view_up;
+    }
+
     /// Initializes rendering vars.
     fn initialize(&mut self) {
-        // Viewport.
+        // Viewport dimensions.
         let aspect_ratio = (self.image_width as f32) / (self.image_height as f32);
-        let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let focal_length = (self.look_at - self.look_from).length();
+        let h = (self.vfov.to_radians() / 2.0).tan();
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * aspect_ratio;
-        let viewport_u = Vector3f::new(viewport_width, 0.0, 0.0);
-        let viewport_v = Vector3f::new(0.0, -viewport_height, 0.0);
+
+        // Orthonormal basis u,v,w for camera coordinate system.
+        let w = (self.look_from - self.look_at).normalize();
+        let u = self.view_up.cross(&w).normalize();
+        let v = w.cross(&u);
+
+        // Viewport vectors across the horizontal and down the vertical viewport edges.
+        let viewport_u = viewport_width * u;
+        let viewport_v = viewport_height * -v;
 
         // Pixel deltas in space.
         self.pixel_delta_u = viewport_u / self.image_width as f32;
         self.pixel_delta_v = viewport_v / self.image_height as f32;
 
         // Pixel positions in space.
-        let viewport_top_left = self.position
-            - Vector3f::new(0.0, 0.0, focal_length)
+        let viewport_top_left = self.look_from
+            - (focal_length * w)
             - (viewport_u / 2.0)
             - (viewport_v / 2.0);
         self.pixel00_location = viewport_top_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
@@ -121,7 +161,7 @@ impl Camera {
             + (y as f32 * self.pixel_delta_v);
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
-        let ray_origin = self.position;
+        let ray_origin = self.look_from;
         let ray_direction = pixel_sample - ray_origin;
 
         Ray::new(ray_origin, ray_direction)

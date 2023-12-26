@@ -94,6 +94,19 @@ impl<T: Float> Vector<T, 3> {
     pub fn z(&self) -> T {
         self.components[2]
     }
+
+    /// Cross product with other 3-dim vector.
+    pub fn cross(&self, v: &Self) -> Self {
+        let a = self.components;
+        let b = v.components;
+        Vector {
+            components: [
+                a[1] * b[2] - a[2] * b[1],
+                a[2] * b[0] - a[0] * b[2],
+                a[0] * b[1] - a[1] * b[0],
+            ],
+        }
+    }
 }
 
 impl<T: Float, const N: usize> Default for Vector<T, N> {
@@ -280,6 +293,13 @@ mod tests {
         let c = Vector3f::new(2.0, 1.0, 0.0);
         assert_eq!(a.dot(&c), 10.0);
         assert_eq!(c.dot(&a), 10.0);
+
+        let d = Vector3f::new(3.0, -3.0, 1.0);
+        let e = Vector3f::new(4.0, 9.0, 2.0);
+        let f = Vector3f::new(-15.0, -2.0, 39.0);
+        assert_eq!(d.cross(&e), f);
+        assert_eq!(e.cross(&d), -f);
+        assert_eq!(d.cross(&d), Vector3f::default());
     }
 
     #[test]
