@@ -21,11 +21,18 @@ impl Dielectric {
             ior: index_of_refraction,
         }
     }
+
+    /// Schlick's approximation for reflectance.
+    fn schlick(&self, incident: Vector3f, normal: Vector3f, eta: f32) -> f32 {
+        let cos_i = (-incident.dot(&normal)).min(1.0);
+        let r0 = ((1.0 - eta) / (1.0 + eta)).powi(2);
+        r0 + (1.0 - r0) * (1.0 - cos_i).powi(5)
+    }
 }
 
 impl Interactable for Dielectric {
     fn interact(&self, incident_ray: Ray, intersection: Intersection) -> Option<Interaction> {
-        // let mut rng = thread_rng();
+        let mut rng = thread_rng();
 
         // Determine whether ray is inside or outside object, flip outward normal.
         let front_face = incident_ray.direction().dot(&intersection.normal) <= 0.0;
@@ -38,9 +45,13 @@ impl Interactable for Dielectric {
         // Refract at intersection normal.
         let etai_over_etat = if front_face { 1.0 / self.ior } else { self.ior };
         let incident = incident_ray.direction().normalize();
-        let scattered = match incident.refract(normal, etai_over_etat) {
-            Some(refracted) => refracted,
-            None => incident.reflect(normal), // Total internal reflection.
+        let scattered = if self.schlick(incident, normal, etai_over_etat) > rng.gen() {
+            incident.reflect(normal) // Schlick's approximation.
+        } else {
+            match incident.refract(normal, etai_over_etat) {
+                Some(refracted) => refracted,
+                None => incident.reflect(normal), // Total internal reflection.
+            }
         };
 
         // Return interaction struct.
